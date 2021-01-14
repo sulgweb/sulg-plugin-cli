@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
+const program = require('commander')
+const chalk = require('chalk')
+const download = require('download-git-repo')
+const inquirer = require('inquirer')
+const ora = require('ora')
+const symbols = require('log-symbols')
+const handlebars = require('handlebars')
+
+program
+  .version(require('../package').version, '-v, --version')
+  .command('create <name>')
+  .action((name) => {
+    if (!fs.existsSync(name)) {
+      inquirer.prompt([
+        {
+          name: 'templateType',
+          message: '请选择创建的模板类型',
+          type: 'list',
+          choices: [
+            //webpack
+            'default',
+            'antd2.0',
+            'elementPlus', 
+          ],
+        },
+        {
+          name: 'description',
+          message: '请输入项目描述:',
+        },
+        {
+          name: 'author',
+          message: '请输入作者:',
+        }
+      ]).then((answers) => {
+        //console.log(answers)
+        // start to download
+        const spinner = ora('正在下载模板...')
+        const spinnerInit = ora('项目初始化...')
+        spinner.start()
+        
+        let downloadPathObj = {
+          //webpack
+          'default':"direct:https://github.com/sulgweb/sulg-plugin-template.git#default",
+          'antd2.0':"direct:https://github.com/sulgweb/sulg-plugin-template.git#antd2.0",
+          'elementPlus':"direct:https://github.com/sulgweb/sulg-plugin-template.git#elementPlus",
+        }
+        let downloadPath = downloadPathObj[answers.templateType]
+        
+        download(downloadPath,
+          name, { clone: true }, (err) => {
+            if (err) {
+              spinner.fail()
+              console.error(symbols.error,
+                chalk.red(`${err}下载失败，请检查你的网络！`))
+              process.exit(1)
+            }else{
+              spinner.succeed()
+              spinnerInit.start()
+              try{
+                const meta = {
+                  name,
+                  version:"1.0.0",
+                  description: answers.description,
+                  author: answers.author,
+                }
+                const fileName = `${name}/package.json`
+                const content = fs.readFileSync(fileName).toString()
+                const result = handlebars.compile(content)(meta)
+                fs.writeFileSync(fileName, result)
+                spinnerInit.succeed()
+              }catch{
+                spinnerInit.fail()
+              } 
+            }
+          })
+      })
+    } else {
+      // 错误提示项目已存在，避免覆盖原有项目
+      console.error(symbols.error, chalk.red('项目已存在'))
+    }
+  }).on('--help', () => {
+    console.log('  Examples:')
+    console.log('    $ w create index')
+    console.log()
+  })
+
+program.parse(process.argv)

@@ -1,0 +1,28 @@
+{
+  "name": "sulg-plugin-cli",
+  "description": "基于vue3.x版本的chrome插件脚手架",
+  "version": "1.0.3",
+  "main": "index.js",
+  "license": "MIT",
+  "keywords": [
+    "chrome",
+    "plugin",
+    "插件",
+    "chrome插件脚手架",
+    "脚手架",
+    "vue3",
+    "antd2.0",
+    "element plus"
+  ],
+  "bin": {
+    "sulgPlugin": "bin/sulgPlugin"
+  },
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "commander": "^6.1.0",
+    "download-git-repo": "^3.0.2",
+    "handlebars": "^4.2.1",
+    "inquirer": "^7.3.3",
+    "ora": "^5.1.0"
+  }
+}
