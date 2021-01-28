@@ -8,6 +8,12 @@ const inquirer = require('inquirer')
 const ora = require('ora')
 const symbols = require('log-symbols')
 const handlebars = require('handlebars')
+const tip = {
+  suc: (msg) => console.log(chalk.green.bold(`\n ✅   ${msg}\n`)),
+  fail: (msg) => console.log(chalk.red.bold(`\n ❌   ${msg}\n`)),
+  info: (msg) => console.log(chalk.blue(`\n ❗️   ${msg}\n`)),
+};
+
 
 program
   .version(require('../package').version, '-v, --version')
@@ -20,10 +26,18 @@ program
           message: '请选择创建的模板类型',
           type: 'list',
           choices: [
-            //webpack
             'default',
             'antd2.0',
             'elementPlus', 
+          ],
+        },
+        {
+          name: 'downloadType',
+          message: '请选择下载地址',
+          type: 'list',
+          choices: [
+            'github',
+            'gitee',
           ],
         },
         {
@@ -36,25 +50,30 @@ program
         }
       ]).then((answers) => {
         //console.log(answers)
-        // start to download
         const spinner = ora('正在下载模板...')
         const spinnerInit = ora('项目初始化...')
         spinner.start()
         
         let downloadPathObj = {
-          //webpack
-          'default':"direct:https://github.com/sulgweb/sulg-plugin-template.git#default",
-          'antd2.0':"direct:https://github.com/sulgweb/sulg-plugin-template.git#antd2.0",
-          'elementPlus':"direct:https://github.com/sulgweb/sulg-plugin-template.git#elementPlus",
+          github:{
+            'default':"direct:https://github.com/sulgweb/sulg-plugin-template.git#default",
+            'antd2.0':"direct:https://github.com/sulgweb/sulg-plugin-template.git#antd2.0",
+            'elementPlus':"direct:https://github.com/sulgweb/sulg-plugin-template.git#elementPlus",
+          },
+          gitee:{
+            'default':"direct:https://gitee.com/xiaoyu-web/sulg-plugin-template.git#default",
+            'antd2.0':"direct:https://gitee.com/xiaoyu-web/sulg-plugin-template.git#antd2.0",
+            'elementPlus':"direct:https://gitee.com/xiaoyu-web/sulg-plugin-template.git#elementPlus",
+          }
         }
-        let downloadPath = downloadPathObj[answers.templateType]
+        let downloadPath = downloadPathObj[answers.downloadType][answers.templateType]
         
         download(downloadPath,
           name, { clone: true }, (err) => {
             if (err) {
               spinner.fail()
-              console.error(symbols.error,
-                chalk.red(`${err}下载失败，请检查你的网络！`))
+              //console.error(symbols.error,chalk.red(`${err}下载失败，请检查你的网络！`))
+              tip.fail(`${err}下载失败，请检查你的网络！`)
               process.exit(1)
             }else{
               spinner.succeed()
@@ -71,6 +90,7 @@ program
                 const result = handlebars.compile(content)(meta)
                 fs.writeFileSync(fileName, result)
                 spinnerInit.succeed()
+                tip.info(`cd ${name} && npm install`);
               }catch{
                 spinnerInit.fail()
               } 
@@ -79,7 +99,8 @@ program
       })
     } else {
       // 错误提示项目已存在，避免覆盖原有项目
-      console.error(symbols.error, chalk.red('项目已存在'))
+      //console.error(symbols.error, chalk.red('项目已存在'))
+      tip.fail('项目已存在')
     }
   }).on('--help', () => {
     console.log('  Examples:')
