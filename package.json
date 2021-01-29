@@ -1,7 +1,7 @@
 {
   "name": "sulg-plugin-cli",
   "description": "基于vue3.x版本的chrome插件脚手架",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "index.js",
   "license": "MIT",
   "keywords": [
