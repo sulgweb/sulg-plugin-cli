@@ -2,17 +2,13 @@
 
 const fs = require('fs')
 const program = require('commander')
-const chalk = require('chalk')
 const download = require('download-git-repo')
 const inquirer = require('inquirer')
 const ora = require('ora')
-const symbols = require('log-symbols')
+//const symbols = require('log-symbols')
 const handlebars = require('handlebars')
-const tip = {
-  suc: (msg) => console.log(chalk.green.bold(`\n ✅   ${msg}\n`)),
-  fail: (msg) => console.log(chalk.red.bold(`\n ❌   ${msg}\n`)),
-  info: (msg) => console.log(chalk.blue(`\n ❗️   ${msg}\n`)),
-};
+const tip = require('./tip')
+const downloadPathObj = require('./downloadPathObj')
 
 
 program
@@ -53,19 +49,6 @@ program
         const spinner = ora('正在下载模板...')
         const spinnerInit = ora('项目初始化...')
         spinner.start()
-        
-        let downloadPathObj = {
-          github:{
-            'default':"direct:https://github.com/sulgweb/sulg-plugin-template.git#default",
-            'antd2.0':"direct:https://github.com/sulgweb/sulg-plugin-template.git#antd2.0",
-            'elementPlus':"direct:https://github.com/sulgweb/sulg-plugin-template.git#elementPlus",
-          },
-          gitee:{
-            'default':"direct:https://gitee.com/xiaoyu-web/sulg-plugin-template.git#default",
-            'antd2.0':"direct:https://gitee.com/xiaoyu-web/sulg-plugin-template.git#antd2.0",
-            'elementPlus':"direct:https://gitee.com/xiaoyu-web/sulg-plugin-template.git#elementPlus",
-          }
-        }
         let downloadPath = downloadPathObj[answers.downloadType][answers.templateType]
         
         download(downloadPath,
@@ -104,8 +87,9 @@ program
     }
   }).on('--help', () => {
     console.log('  Examples:')
-    console.log('    $ w create index')
     console.log()
+    console.log('    $ sulgPlugin create index')
+    
   })
 
 program.parse(process.argv)
